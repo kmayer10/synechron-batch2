@@ -1,0 +1,51 @@
+---
+
+- hosts: synechron
+
+  vars: 
+    user: "{{ demo }}"
+
+  tasks:
+    - name: creating "{{ user }}"
+      user: name="{{ user }}" state=present
+
+    - name: creating another user
+      user:
+        name: thinknyx2
+        state: present
+
+    - name: CReating group for next tasks
+      group: name=synechron state=present
+
+    - name: Creting one more user
+      user: name=user3 group=synechron state=present
+
+    - name: Installing NTP
+      yum: name=ntp state=present
+
+    - name: checking NTP Service
+      service: 
+        name: ntpd
+        state: started
+        enabled: true
+    - name: Creating file 
+      file: path=/var/tmp/think state=touch mode=0777
+
+    - name: Creating directory
+      file: 
+        path: /var/tmp/thinkyx
+        state: directory
+        mode: 777
+
+    - name: NTP Configurations
+      #file: path=/etc/etc/ntp.conf state=file
+      copy:
+        src: ntp.conf
+        dest: /etc/ntp.conf
+      notify: 
+        - restart NTP
+
+  handlers:
+     
+    - name: restart NTP
+      service: name=ntpd state=restarted
